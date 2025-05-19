@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'services/api_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/profile_setup_screen.dart';
+import 'screens/home_page.dart';
 import 'screens/profile_page.dart';
+import 'screens/settings_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
           '/auth': (context) => const AuthScreen(),
           '/profile-setup': (context) => const ProfileSetupScreen(),
           '/home': (context) => const MainScreen(),
-          '/profile': (context) => const ProfilePage(),
+          '/settings': (context) => const SettingsPage(),
         },
       ),
     );
@@ -81,7 +83,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   static final List<Widget> _pages = [
-    const ProfilePage(), // Only profile-related page retained
+    const HomePage(),
+    const ProfilePage(),
+    const SettingsPage(),
   ];
 
   @override
@@ -96,7 +100,9 @@ class _MainScreenState extends State<MainScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.swipe), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).primaryColor,
