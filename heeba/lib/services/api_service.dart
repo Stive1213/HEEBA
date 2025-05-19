@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
+import '../models/profile.dart';
 import '../models/user.dart';
 
 class ApiService {
@@ -55,6 +57,96 @@ class ApiService {
     } else {
       final error = _parseError(response.body, 'Login failed');
       print('Login error: $error');
+      throw Exception(error);
+    }
+  }
+
+  // Check Profile Existence
+  Future<bool> checkProfile() async {
+    final token = await _getToken();
+    if (token == null) {
+      print('No token found for profile check');
+      throw Exception('No token available');
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/profile/check'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    print('Profile check response: ${response.statusCode} ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['hasProfile'] ?? false;
+    } else {
+      final error = _parseError(response.body, 'Failed to check profile');
+      print('Check profile error: $error');
+      throw Exception(error);
+    }
+  }
+
+  // Create/Update Profile
+  Future<void> saveProfile({
+    required String firstName,
+    required String lastName,
+    String? nickname,
+    required int age,
+    String? gender,
+    String? bio,
+    required String region,
+    required String city,
+    PlatformFile? pfp,
+  }) async {
+    final token = await _getToken();
+    if (token == null) {
+      print('No token for profile creation');
+      throw Exception('No token available');
+    }
+
+    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/profile'));
+    request.headers['Authorization'] = 'Bearer $token';
+
+    request.fields['first_name'] = firstName;
+    request.fields['last_name'] = lastName;
+    if (nickname != null) request.fields['nickname'] = nickname;
+    request.fields['age'] = age.toString();
+    if (gender != null) request.fields['gender'] = gender;
+    if (bio != null) request.fields['bio'] = bio;
+    request.fields['region'] = region;
+    request.fields['city'] = city;
+
+    if (pfp != null && pfp.path != null) {
+      request.files.add(await http.MultipartFile.fromPath('pfp', pfp.path!));
+    }
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    print('Save profile response: ${response.statusCode} $responseBody');
+    if (response.statusCode != 201) {
+      final error = _parseError(responseBody, 'Failed to save profile');
+      print('Save profile error: $error');
+      throw Exception(error);
+    }
+  }
+
+  // Get Current User's Profile
+  Future<Profile> getCurrentProfile() async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token available');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/profile/me'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return Profile.fromJson(data);
+    } else {
+      final error = _parseError(response.body, 'Failed to load profile');
+      print('Get current profile error: $error');
       throw Exception(error);
     }
   }
