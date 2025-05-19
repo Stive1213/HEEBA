@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,6 +60,13 @@ class ApiService {
       print('Login error: $error');
       throw Exception(error);
     }
+  }
+
+  // Clear token (for logout)
+  Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    print('Token cleared');
   }
 
   // Check Profile Existence
@@ -123,7 +131,8 @@ class ApiService {
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
 
-    print('Save profile response: ${response.statusCode} $responseBody');
+print('Save profile response: ${response.statusCode} $responseBody');
+
     if (response.statusCode != 201) {
       final error = _parseError(responseBody, 'Failed to save profile');
       print('Save profile error: $error');
@@ -147,6 +156,30 @@ class ApiService {
     } else {
       final error = _parseError(response.body, 'Failed to load profile');
       print('Get current profile error: $error');
+      throw Exception(error);
+    }
+  }
+
+  // Record Swipe
+  Future<void> recordSwipe(int targetUserId, String swipeType) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token available');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/swipe'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'target_user_id': targetUserId,
+        'swipe_type': swipeType,
+      }),
+    );
+
+    if (response.statusCode != 201) {
+      final error = _parseError(response.body, 'Failed to record swipe');
+      print('Swipe error: $error');
       throw Exception(error);
     }
   }
