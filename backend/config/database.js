@@ -69,15 +69,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
       )
     `);
     // Add notifications_enabled column to users table
-db.run(`
-  ALTER TABLE users ADD COLUMN notifications_enabled INTEGER DEFAULT 1
-`, (err) => {
-  if (err) {
-    console.error('Error adding notifications_enabled column:', err.message);
-  } else {
-    console.log('Added notifications_enabled column to users table');
-  }
-});
+
     // Seed users and profiles
     db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
       if (err) {

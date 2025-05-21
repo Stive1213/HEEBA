@@ -25,13 +25,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
-    _heartScaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    _heartScaleAnimation = Tween<double>(begin: 0.9, end: 1.3).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOutSine),
     );
-    _heartOpacityAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    _heartOpacityAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOutSine),
     );
   }
 
@@ -90,29 +90,35 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(
-        primaryColor: const Color(0xFFFF6B6B), // Blush pink
-        scaffoldBackgroundColor: const Color(0xFFF8F1F1), // Off-white
-        textTheme: Theme.of(context).textTheme.copyWith(
-              bodyMedium: const TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 16,
-                color: Color(0xFF1A1A40), // Deep navy
-              ),
-              labelMedium: const TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
+        primaryColor: const Color(0xFFF06292), // Soft pink
+        scaffoldBackgroundColor: const Color(0xFFF9F7F7), // Warm off-white
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 16,
+            color: Color(0xFF1A1A40), // Deep navy
+          ),
+          labelMedium: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+          headlineSmall: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 36,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFFF06292),
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(25),
             ),
-            elevation: 5,
-            shadowColor: Colors.black.withOpacity(0.2),
+            elevation: 6,
+            shadowColor: Colors.black.withOpacity(0.3),
             textStyle: const TextStyle(
               fontFamily: 'Roboto',
               fontSize: 16,
@@ -122,7 +128,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF1A1A40), // Deep navy
+            foregroundColor: const Color(0xFFF06292),
             textStyle: const TextStyle(
               fontFamily: 'Roboto',
               fontWeight: FontWeight.w500,
@@ -133,26 +139,36 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(color: Color(0xFFEDEDED)),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[200]!),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 2),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFF06292), width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFE57373), width: 2),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFE57373), width: 2),
           ),
           labelStyle: const TextStyle(
             fontFamily: 'Roboto',
             color: Colors.grey,
+            fontSize: 14,
           ),
           errorStyle: const TextStyle(
             fontFamily: 'Roboto',
-            color: Color(0xFFFF8787), // Coral for errors
+            color: Color(0xFFE57373),
+            fontSize: 12,
           ),
         ),
       ),
@@ -169,29 +185,29 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     child: const Icon(
                       Icons.favorite,
                       color: Colors.white,
-                      size: 24,
+                      size: 26,
                     ),
                   );
                 },
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Text(
                 _isLogin ? 'Login' : 'Signup',
                 style: const TextStyle(
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 22,
                 ),
               ),
             ],
           ),
-          backgroundColor: const Color(0xFFFF6B6B),
+          backgroundColor: Colors.transparent,
           elevation: 0,
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF6B6B), Color(0xFFFF8787)],
+                colors: [Color(0xFFF06292), Color(0xFFF48FB1)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -201,163 +217,203 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         body: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(
-                  color: Color(0xFFFF6B6B),
+                  color: Color(0xFFF06292),
                 ),
               )
             : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (!_isLogin)
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Name',
-                              prefixIcon: Icon(Icons.person, color: Color(0xFFFF6B6B)),
-                            ),
-                            validator: (value) =>
-                                value == null || value.isEmpty ? 'Enter your name' : null,
-                          ),
-                        ),
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email, color: Color(0xFFFF6B6B)),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) => value == null || !value.contains('@')
-                              ? 'Enter a valid email'
-                              : null,
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: TextFormField(
-                          controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(Icons.lock, color: Color(0xFFFF6B6B)),
-                          ),
-                          obscureText: true,
-                          validator: (value) => value == null || value.length < 6
-                              ? 'Password must be at least 6 characters'
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Stack(
-                        alignment: Alignment.centerRight,
-                        children: [
-                          ElevatedButton(
-                            onPressed: _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              elevation: 5,
-                              shadowColor: Colors.black.withOpacity(0.2),
-                            ),
-                            child: Ink(
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Color(0xFFFF6B6B), Color(0xFFFFD700)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.all(Radius.circular(30)),
-                              ),
-                              child: Container(
-                                alignment: Alignment.center,
-                                constraints: const BoxConstraints(minHeight: 50),
-                                child: Text(
-                                  _isLogin ? 'Login' : 'Signup',
-                                  style: const TextStyle(
-                                    fontFamily: 'Roboto',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // HEEBA Logo
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 32),
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 0.95 + _heartScaleAnimation.value * 0.05,
+                            child: Text(
+                              'HEEBA',
+                              style: const TextStyle(
+                                fontFamily: 'Roboto',
+                                fontSize: 48,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFF06292),
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black26,
+                                    blurRadius: 8,
+                                    offset: Offset(2, 2),
                                   ),
-                                ),
+                                ],
                               ),
                             ),
-                          ),
-                          Positioned(
-                            right: 16,
-                            child: AnimatedBuilder(
-                              animation: _animationController,
-                              builder: (context, child) {
-                                return Opacity(
-                                  opacity: _heartOpacityAnimation.value,
-                                  child: Transform.scale(
-                                    scale: _heartScaleAnimation.value,
-                                    child: const Icon(
-                                      Icons.favorite,
-                                      color: Color(0xFFFF8787),
-                                      size: 20,
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 500),
+                      child: Card(
+                        elevation: 8,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (!_isLogin)
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 20),
+                                    child: TextFormField(
+                                      controller: _nameController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Name',
+                                        prefixIcon: const Icon(Icons.person, color: Color(0xFFF06292)),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                      ),
+                                      validator: (value) =>
+                                          value == null || value.isEmpty ? 'Enter your name' : null,
                                     ),
                                   ),
-                                );
-                              },
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 20),
+                                  child: TextFormField(
+                                    controller: _emailController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Email',
+                                      prefixIcon: const Icon(Icons.email, color: Color(0xFFF06292)),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (value) => value == null || !value.contains('@')
+                                        ? 'Enter a valid email'
+                                        : null,
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 20),
+                                  child: TextFormField(
+                                    controller: _passwordController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Password',
+                                      prefixIcon: const Icon(Icons.lock, color: Color(0xFFF06292)),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    obscureText: true,
+                                    validator: (value) => value == null || value.length < 6
+                                        ? 'Password must be at least 6 characters'
+                                        : null,
+                                  ),
+                                ),
+                                const SizedBox(height: 28),
+                                Stack(
+                                  alignment: Alignment.centerRight,
+                                  children: [
+                                    MouseRegion(
+                                      cursor: SystemMouseCursors.click,
+                                      child: ElevatedButton(
+                                        onPressed: _submit,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(25),
+                                          ),
+                                          elevation: 6,
+                                          shadowColor: Colors.black.withOpacity(0.3),
+                                        ),
+                                        child: Ink(
+                                          decoration: const BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [Color(0xFFF06292), Color(0xFFFF8A80)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            borderRadius: BorderRadius.all(Radius.circular(25)),
+                                          ),
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            constraints: const BoxConstraints(minHeight: 56),
+                                            child: Text(
+                                              _isLogin ? 'Login' : 'Signup',
+                                              style: const TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      right: 20,
+                                      child: AnimatedBuilder(
+                                        animation: _animationController,
+                                        builder: (context, child) {
+                                          return Opacity(
+                                            opacity: _heartOpacityAnimation.value,
+                                            child: Transform.scale(
+                                              scale: _heartScaleAnimation.value,
+                                              child: const Icon(
+                                                Icons.favorite,
+                                                color: Color(0xFFFF8A80),
+                                                size: 22,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: TextButton(
+                                    onPressed: () => setState(() => _isLogin = !_isLogin),
+                                    child: Text(
+                                      _isLogin
+                                          ? 'Create an account'
+                                          : 'Already have an account? Login',
+                                      style: const TextStyle(
+                                        fontFamily: 'Roboto',
+                                        color: Color(0xFFF06292),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => setState(() => _isLogin = !_isLogin),
-                        child: Text(
-                          _isLogin
-                              ? 'Create an account'
-                              : 'Already have an account? Login',
-                          style: const TextStyle(
-                            fontFamily: 'Roboto',
-                            color: Color(0xFFFFD700), // Warm gold
-                            fontSize: 14,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
       ),

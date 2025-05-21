@@ -5,7 +5,9 @@ import 'screens/auth_screen.dart';
 import 'screens/profile_setup_screen.dart';
 import 'screens/home_page.dart';
 import 'screens/profile_page.dart';
-import 'screens/settings_page.dart';
+import 'screens/match_page.dart';
+import 'screens/chat_page.dart';
+import 'screens/settings_page.dart'; // Import the new SettingsPage
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +15,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -31,7 +33,14 @@ class MyApp extends StatelessWidget {
           '/auth': (context) => const AuthScreen(),
           '/profile-setup': (context) => const ProfileSetupScreen(),
           '/home': (context) => const MainScreen(),
-          '/settings': (context) => const SettingsPage(),
+          '/chat': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return ChatPage(
+              matchId: args['matchId'],
+              matchName: args['matchName'],
+            );
+          },
+          '/settings': (context) => const SettingsPage(), // Add SettingsPage route
         },
       ),
     );
@@ -84,8 +93,8 @@ class _MainScreenState extends State<MainScreen> {
 
   static final List<Widget> _pages = [
     const HomePage(),
+    const MatchPage(),
     const ProfilePage(),
-    const SettingsPage(),
   ];
 
   @override
@@ -101,8 +110,8 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.swipe), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Matches'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).primaryColor,
