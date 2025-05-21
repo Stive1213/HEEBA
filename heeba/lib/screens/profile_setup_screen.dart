@@ -22,7 +22,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   PlatformFile? _pfpFile;
   bool _isLoading = false;
 
-  // Ethiopia region-city mapping
   final Map<String, List<String>> _regionCities = {
     'Addis Ababa': ['Addis Ababa', 'Bole'],
     'Dire Dawa': ['Dire Dawa'],
@@ -40,7 +39,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     'Central Ethiopia Region': ['Bishoftu'],
   };
 
-  // Pick profile picture
   Future<void> _pickPfp() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null && result.files.single.path != null) {
@@ -50,7 +48,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     }
   }
 
-  // Submit profile to backend
   Future<void> _submitProfile() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
@@ -73,7 +70,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save profile: ${e.toString().replaceAll('Exception: ', '')}')),
+          SnackBar(
+            content: Text('Failed to save profile: ${e.toString().replaceAll('Exception: ', '')}'),
+          ),
         );
       }
     }
@@ -92,103 +91,132 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final inputDecoration = InputDecoration(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Set Up Profile'),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        centerTitle: true,
+        elevation: 2,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _firstNameController,
-                      decoration: const InputDecoration(labelText: 'First Name'),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Enter first name' : null,
-                    ),
-                    TextFormField(
-                      controller: _lastNameController,
-                      decoration: const InputDecoration(labelText: 'Last Name'),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Enter last name' : null,
-                    ),
-                    TextFormField(
-                      controller: _ageController,
-                      decoration: const InputDecoration(labelText: 'Age'),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Enter age';
-                        final age = int.tryParse(value);
-                        if (age == null || age < 18) return 'Must be 18+';
-                        return null;
-                      },
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _gender,
-                      decoration: const InputDecoration(labelText: 'Gender'),
-                      items: ['Male', 'Female']
-                          .map((gender) => DropdownMenuItem(
-                                value: gender,
-                                child: Text(gender),
-                              ))
-                          .toList(),
-                      onChanged: (value) => setState(() => _gender = value),
-                      validator: (value) => value == null ? 'Select gender' : null,
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _region,
-                      decoration: const InputDecoration(labelText: 'Region'),
-                      items: _regionCities.keys
-                          .map((region) => DropdownMenuItem(
-                                value: region,
-                                child: Text(region),
-                              ))
-                          .toList(),
-                      onChanged: (value) => setState(() {
-                        _region = value;
-                        _city = null;
-                      }),
-                      validator: (value) => value == null ? 'Select region' : null,
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _city,
-                      decoration: const InputDecoration(labelText: 'City'),
-                      items: _region == null
-                          ? []
-                          : _regionCities[_region]!
-                              .map((city) => DropdownMenuItem(
-                                    value: city,
-                                    child: Text(city),
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _firstNameController,
+                          decoration: inputDecoration.copyWith(labelText: 'First Name'),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Enter first name' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _lastNameController,
+                          decoration: inputDecoration.copyWith(labelText: 'Last Name'),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Enter last name' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _ageController,
+                          decoration: inputDecoration.copyWith(labelText: 'Age'),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Enter age';
+                            final age = int.tryParse(value);
+                            if (age == null || age < 18) return 'Must be 18+';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _gender,
+                          decoration: inputDecoration.copyWith(labelText: 'Gender'),
+                          items: ['Male', 'Female']
+                              .map((gender) => DropdownMenuItem(
+                                    value: gender,
+                                    child: Text(gender),
                                   ))
                               .toList(),
-                      onChanged: (value) => setState(() => _city = value),
-                      validator: (value) => value == null ? 'Select city' : null,
+                          onChanged: (value) => setState(() => _gender = value),
+                          validator: (value) => value == null ? 'Select gender' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _region,
+                          decoration: inputDecoration.copyWith(labelText: 'Region'),
+                          items: _regionCities.keys
+                              .map((region) => DropdownMenuItem(
+                                    value: region,
+                                    child: Text(region),
+                                  ))
+                              .toList(),
+                          onChanged: (value) => setState(() {
+                            _region = value;
+                            _city = null;
+                          }),
+                          validator: (value) => value == null ? 'Select region' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _city,
+                          decoration: inputDecoration.copyWith(labelText: 'City'),
+                          items: _region == null
+                              ? []
+                              : _regionCities[_region]!
+                                  .map((city) => DropdownMenuItem(
+                                        value: city,
+                                        child: Text(city),
+                                      ))
+                                  .toList(),
+                          onChanged: (value) => setState(() => _city = value),
+                          validator: (value) => value == null ? 'Select city' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _bioController,
+                          decoration: inputDecoration.copyWith(labelText: 'Bio (optional)'),
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 20),
+                        OutlinedButton.icon(
+                          onPressed: _pickPfp,
+                          icon: const Icon(Icons.upload),
+                          label: const Text('Upload Profile Picture'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                          ),
+                        ),
+                        if (_pfpFile != null) ...[
+                          const SizedBox(height: 8),
+                          Text('Selected: ${_pfpFile!.name}',
+                              style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _submitProfile,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Save Profile', style: TextStyle(fontSize: 16)),
+                        ),
+                      ],
                     ),
-                    TextFormField(
-                      controller: _bioController,
-                      decoration: const InputDecoration(labelText: 'Bio (optional)'),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _pickPfp,
-                      child: const Text('Upload Profile Picture (optional)'),
-                    ),
-                    if (_pfpFile != null) ...[
-                      const SizedBox(height: 8),
-                      Text('Selected: ${_pfpFile!.name}'),
-                    ],
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _submitProfile,
-                      child: const Text('Save Profile'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
