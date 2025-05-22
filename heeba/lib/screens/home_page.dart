@@ -23,6 +23,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Timer? _debounce;
   late AnimationController _animationController;
   late Animation<double> _heartScaleAnimation;
+  bool _isFilterVisible = false;
+  final GlobalKey _filterKey = GlobalKey(); // Added for measuring filter height
+  double? _filterHeight; // Store the filter section height
 
   final Map<String, List<String>> _regionCities = {
     'Addis Ababa': ['Addis Ababa', 'Bole'],
@@ -51,7 +54,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _heartScaleAnimation = Tween<double>(begin: 0.9, end: 1.3).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOutSine),
     );
+    // Measure filter height after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureFilterHeight());
     _fetchProfiles();
+  }
+
+  // Measure the height of the filter section
+  void _measureFilterHeight() {
+    final RenderBox? renderBox = _filterKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null && mounted) {
+      setState(() {
+        _filterHeight = renderBox.size.height;
+      });
+    }
   }
 
   Future<void> _fetchProfiles() async {
@@ -291,6 +306,27 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isFilterVisible = !_isFilterVisible;
+                  if (_isFilterVisible) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) => _measureFilterHeight());
+                  }
+                });
+              },
+              child: Text(
+                _isFilterVisible ? 'Close' : 'Filter',
+                style: const TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -306,173 +342,189 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Filter Section
-                  Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    height: _isFilterVisible ? (_filterHeight ?? 400) : 0, // Use measured height or fallback
                     constraints: const BoxConstraints(maxWidth: 600),
-                    child: Card(
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.only(bottom: 20),
-                                      child: TextFormField(
-                                        controller: _minAgeController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Min Age',
-                                          prefixIcon: const Icon(Icons.person, color: Color(0xFFF06292)),
-                                          filled: true,
-                                          fillColor: Colors.white,
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                            borderSide: BorderSide.none,
+                    child: ClipRect(
+                      child: OverflowBox(
+                        maxHeight: double.infinity, // Allow content to render fully for measurement
+                        child: _isFilterVisible
+                            ? Card(
+                                key: _filterKey, // Attach key for measurement
+                                elevation: 8,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Container(
+                                                margin: const EdgeInsets.only(bottom: 20),
+                                                child: TextFormField(
+                                                  controller: _minAgeController,
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Min Age',
+                                                    prefixIcon: const Icon(Icons.person, color: Color(0xFFF06292)),
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    border: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      borderSide: BorderSide.none,
+                                                    ),
+                                                  ),
+                                                  keyboardType: TextInputType.number,
+                                                  validator: (value) {
+                                                    if (value == null || value.isEmpty) return 'Enter min age';
+                                                    final age = int.tryParse(value);
+                                                    if (age == null || age < 18) return 'Must be 18+';
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: Container(
+                                                margin: const EdgeInsets.only(bottom: 20),
+                                                child: TextFormField(
+                                                  controller: _maxAgeController,
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Max Age',
+                                                    prefixIcon: const Icon(Icons.person, color: Color(0xFFF06292)),
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    border: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      borderSide: BorderSide.none,
+                                                    ),
+                                                  ),
+                                                  keyboardType: TextInputType.number,
+                                                  validator: (value) {
+                                                    if (value == null || value.isEmpty) return 'Enter max age';
+                                                    final age = int.tryParse(value);
+                                                    if (age == null || age < int.tryParse(_minAgeController.text)!) {
+                                                      return 'Max age must be ≥ min age';
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.only(bottom: 20),
+                                          child: DropdownButtonFormField<String>(
+                                            value: _region,
+                                            decoration: InputDecoration(
+                                              labelText: 'Region',
+                                              prefixIcon: const Icon(Icons.location_on, color: Color(0xFFF06292)),
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
+                                            items: _regionCities.keys
+                                                .map((region) => DropdownMenuItem(
+                                                      value: region,
+                                                      child: Text(region),
+                                                    ))
+                                                .toList(),
+                                            onChanged: (value) => setState(() {
+                                              _region = value;
+                                              _city = null;
+                                            }),
                                           ),
                                         ),
-                                        keyboardType: TextInputType.number,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) return 'Enter min age';
-                                          final age = int.tryParse(value);
-                                          if (age == null || age < 18) return 'Must be 18+';
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.only(bottom: 20),
-                                      child: TextFormField(
-                                        controller: _maxAgeController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Max Age',
-                                          prefixIcon: const Icon(Icons.person, color: Color(0xFFF06292)),
-                                          filled: true,
-                                          fillColor: Colors.white,
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                            borderSide: BorderSide.none,
+                                        Container(
+                                          margin: const EdgeInsets.only(bottom: 20),
+                                          child: DropdownButtonFormField<String>(
+                                            value: _city,
+                                            decoration: InputDecoration(
+                                              labelText: 'City',
+                                              prefixIcon: const Icon(Icons.location_city, color: Color(0xFFF06292)),
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide.none,
+                                              ),
+                                            ),
+                                            items: _region == null
+                                                ? []
+                                                : _regionCities[_region]!
+                                                    .map((city) => DropdownMenuItem(
+                                                          value: city,
+                                                          child: Text(city),
+                                                        ))
+                                                    .toList(),
+                                            onChanged: (value) => setState(() => _city = value),
                                           ),
                                         ),
-                                        keyboardType: TextInputType.number,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) return 'Enter max age';
-                                          final age = int.tryParse(value);
-                                          if (age == null || age < int.tryParse(_minAgeController.text)!) {
-                                            return 'Max age must be ≥ min age';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 20),
-                                child: DropdownButtonFormField<String>(
-                                  value: _region,
-                                  decoration: InputDecoration(
-                                    labelText: 'Region',
-                                    prefixIcon: const Icon(Icons.location_on, color: Color(0xFFF06292)),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  items: _regionCities.keys
-                                      .map((region) => DropdownMenuItem(
-                                            value: region,
-                                            child: Text(region),
-                                          ))
-                                      .toList(),
-                                  onChanged: (value) => setState(() {
-                                    _region = value;
-                                    _city = null;
-                                  }),
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 20),
-                                child: DropdownButtonFormField<String>(
-                                  value: _city,
-                                  decoration: InputDecoration(
-                                    labelText: 'City',
-                                    prefixIcon: const Icon(Icons.location_city, color: Color(0xFFF06292)),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  items: _region == null
-                                      ? []
-                                      : _regionCities[_region]!
-                                          .map((city) => DropdownMenuItem(
-                                                value: city,
-                                                child: Text(city),
-                                              ))
-                                          .toList(),
-                                  onChanged: (value) => setState(() => _city = value),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      _fetchProfiles();
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                    elevation: 6,
-                                    shadowColor: Colors.black.withOpacity(0.3),
-                                  ),
-                                  child: Ink(
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [Color(0xFFF06292), Color(0xFFFF8A80)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.all(Radius.circular(25)),
-                                    ),
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      constraints: const BoxConstraints(minHeight: 56),
-                                      child: const Text(
-                                        'Apply Filters',
-                                        style: TextStyle(
-                                          fontFamily: 'Roboto',
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                        const SizedBox(height: 20),
+                                        MouseRegion(
+                                          cursor: SystemMouseCursors.click,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              if (_formKey.currentState!.validate()) {
+                                                _fetchProfiles();
+                                                setState(() {
+                                                  _isFilterVisible = false; // Hide filters after applying
+                                                  WidgetsBinding.instance
+                                                      .addPostFrameCallback((_) => _measureFilterHeight());
+                                                });
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(25),
+                                              ),
+                                              elevation: 6,
+                                              shadowColor: Colors.black.withOpacity(0.3),
+                                            ),
+                                            child: Ink(
+                                              decoration: const BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [Color(0xFFF06292), Color(0xFFFF8A80)],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.all(Radius.circular(25)),
+                                              ),
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                constraints: const BoxConstraints(minHeight: 56),
+                                                child: const Text(
+                                                  'Apply Filters',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                     ),
                   ),
